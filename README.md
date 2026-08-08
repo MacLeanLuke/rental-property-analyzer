@@ -1,86 +1,82 @@
 # Rental Property Analyzer
 
-A client-side web app for evaluating whether to keep or sell a rental property, and for comparing several properties side-by-side. Plug in numbers, see a live verdict, and download a fully-formulated Excel workbook you can keep tweaking on your own.
+Should you keep the rental or sell it? This answers that with a real model, then
+hands you the spreadsheet so you can argue with it.
 
-## What it does
+[![npm](https://img.shields.io/badge/data-never%20leaves%20your%20browser-brightgreen)](#privacy)
 
-- Enter inputs for one or more rental properties (purchase price, mortgage, rent, opex, tax, risk assumptions).
-- See live metrics: cap rate, cash-on-cash, current equity, monthly cash flow, hurdle rate (CAPM-based), NPV and IRR at a 10-year exit, and a hold-vs-sell verdict.
-- Compare multiple properties in one view with a "best in row" table and an NPV-by-exit-year chart.
-- Download a multi-sheet Excel workbook (`Inputs`, `Hold Scenario`, `Hold vs Sell`, `Sell Scenario`, `References`) where every projection is a live formula — change an input, and the whole workbook recalculates.
+## Why this exists
+
+Most rent-vs-sell calculators give you a number and no way to check their work. You
+can't see the assumptions, you can't change the discount rate, and you certainly
+can't hand the output to an accountant.
+
+This does the opposite. Every projection is visible, every assumption is an input,
+and the Excel export is **fully formulated** — not a dump of computed values. Change
+a cell in the workbook and the whole thing recalculates, because the formulas are
+real formulas.
+
+## What it computes
+
+Enter purchase price, mortgage terms, rent, operating expenses, tax and risk
+assumptions, and you get:
+
+- **Cap rate** and **cash-on-cash return**
+- **Current equity** and **monthly cash flow**
+- **Hurdle rate**, derived from CAPM rather than guessed
+- **NPV** and **IRR** at a 10-year exit
+- A **hold-vs-sell verdict** with the reasoning shown
+
+Multiple properties can be compared side by side, with a best-in-row table and an
+NPV-by-exit-year chart that shows how the decision shifts with your holding period.
+
+## The Excel export
+
+Downloads a five-sheet workbook — `Inputs`, `Hold Scenario`, `Hold vs Sell`,
+`Sell Scenario`, `References` — built in-browser with
+[exceljs](https://github.com/exceljs/exceljs).
+
+The point of the export is that it stays alive. Projections are written as Excel
+formulas referencing the `Inputs` sheet, so the workbook is a working model you can
+keep tweaking offline, share with a partner, or send to a CPA — not a dead snapshot.
 
 ## Privacy
 
-This is a **pure static SPA**. There is no backend, no database, and no auth.
+This is a **pure static SPA**. No backend, no database, no accounts, no telemetry on
+your numbers.
 
-**Your property data never leaves your device.**
+Property data stays in `localStorage` under `rental-analyzer:properties:v1`, and
+workbooks are generated client-side and downloaded directly. Your financial details
+never touch a server, because there is no server.
 
-- All property data stays in your browser's `localStorage` under the key `rental-analyzer:properties:v1`.
-- Excel files are built in-browser with [exceljs](https://github.com/exceljs/exceljs) and downloaded directly.
-- Backup (JSON export) and restore (JSON import) happen entirely on your machine.
+## Stack
 
-Clearing your browser storage deletes your properties. No copy exists anywhere else.
+React · TypeScript · Vite · Tailwind · Recharts for visualization · exceljs for
+workbook generation · Zod for input schemas.
 
-**Anonymous usage is recorded.** The app uses [Vercel Web Analytics](https://vercel.com/docs/analytics),
-which is cookieless and stores nothing on your device. It reports page views plus a fixed set of
-named events — which screens get opened, and whether the Excel export, comparison, or backup
-features get used.
-
-No property values, nicknames, or dollar amounts are ever transmitted, and this is enforced by the
-code rather than by convention: [`src/lib/analytics.ts`](src/lib/analytics.ts) exports a `track()`
-that accepts **only a name from a fixed union and no payload argument**. Sending a financial value
-through analytics would be a compile error. That one short file is the complete list of everything
-this app is capable of reporting.
-
-## Local development
+## Running locally
 
 ```bash
 npm install
-npm run dev       # start Vite dev server
-npm run build     # production build to dist/
-npm run preview   # serve the built bundle locally
+npm run dev      # dev server
+npm run build    # production build
+npm run lint
 ```
 
-## Deployment
+## Layout
 
-This is a static site — any static host works. `dist/` is the build output.
+The financial model is deliberately isolated from the UI so it can be tested and
+reasoned about on its own:
 
-- **Vercel / Netlify / Cloudflare Pages**: point at this directory, build command `npm run build`, output directory `dist`.
-- **GitHub Pages**: build locally, push `dist/` to the `gh-pages` branch.
-
-No environment variables are required.
-
-## Tech stack
-
-- Vite + React 19 + TypeScript
-- Tailwind CSS v4 with shadcn-style components (no Radix dependency)
-- [exceljs](https://github.com/exceljs/exceljs) for client-side `.xlsx` generation with formulas
-- [recharts](https://recharts.org/) for the NPV comparison chart
-- [zod](https://zod.dev/) for validating imported JSON backups
-
-## Architecture notes
-
-### Two parallel calculation layers
-
-There are **two** independent implementations of the financial model, and they are intentionally not merged:
-
-1. **`src/domain/metrics.ts`** — TypeScript functions used for the live UI (sidebar, comparison table, chart). Pure functions, instantly reactive.
-2. **`src/domain/xlsx.ts`** — Excel cell formulas written into the downloaded workbook, so the user can modify any input in Excel and watch everything update.
-
-If you change the model, update **both** layers and re-run the smoke test.
-
-### Code-splitting
-
-The xlsx module is large (~1MB). It's loaded on demand via dynamic `import()` when the user clicks Download, so the initial page load stays small.
-
-## Testing
-
-```bash
-npx tsx scripts/smoke-test-xlsx.ts
+```
+src/domain/
+  metrics.ts     cap rate, CoC, NPV, IRR, CAPM hurdle rate, verdict
+  schema.ts      Zod schemas for every input
+  xlsx.ts        workbook generation with live formulas
+  storage.ts     localStorage persistence
+  types.ts       shared domain types
+src/components/  form, property list, comparison view, metrics sidebar
 ```
 
-Generates `smoke-single.xlsx` and `smoke-comparison.xlsx`, then re-opens them to verify the sheet structure and a few key formulas. Open the files in Excel/Numbers to sanity-check the output visually.
-
-## License
-
-MIT — use freely.
+`scripts/smoke-test-xlsx.ts` verifies the generated workbook opens and its formulas
+resolve.
