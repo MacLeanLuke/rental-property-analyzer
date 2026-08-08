@@ -49,6 +49,21 @@ Property data stays in `localStorage` under `rental-analyzer:properties:v1`, and
 workbooks are generated client-side and downloaded directly. Your financial details
 never touch a server, because there is no server.
 
+### Don't take my word for it
+
+The panel in the bottom-right corner is a live dissection of every request this
+page makes — DNS, TCP, TLS, waiting, download, per request. Open it and watch:
+after the initial page load, **nothing happens.** No API calls, no telemetry, no
+analytics beacons. A privacy claim you can verify beats one you have to trust.
+
+It reads the browser's own `PerformanceResourceTiming` entries, so it cannot miss
+a request the page makes — including one it made itself.
+
+Built from [page-load-anatomy](https://github.com/MacLeanLuke/page-load-anatomy).
+The bundle is vendored at `public/vendor/` (6.6KB) rather than installed, because
+those packages aren't published yet; `npm run vendor:pipe` refreshes it from a
+local checkout.
+
 ## Stack
 
 React · TypeScript · Vite · Tailwind · Recharts for visualization · exceljs for

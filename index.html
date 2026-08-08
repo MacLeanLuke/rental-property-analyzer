@@ -10,5 +10,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!--
+      Live network dissection. This app claims your property data never leaves
+      the device, and the panel is the receipt: open it and there is nothing
+      after the initial page load. No API calls, no telemetry, no beacons.
+
+      Built from github.com/MacLeanLuke/page-load-anatomy.
+      Refresh with: npm run vendor:pipe
+    -->
+    <script defer src="/vendor/pipe-anatomy.global.js"></script>
   </body>
 </html>
