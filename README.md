@@ -1,5 +1,7 @@
 # Rental Property Analyzer
 
+**[Live demo →](https://luke-rental-analyzer.vercel.app)**
+
 Should you keep the rental or sell it? This answers that with a real model, then
 hands you the spreadsheet so you can argue with it.
 
