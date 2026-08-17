@@ -18,10 +18,14 @@ function App() {
 
   const editing = view.kind === 'edit' ? properties.find((p) => p.id === view.id) : undefined
 
-  // If the edited property has been deleted, fall back to list.
-  useEffect(() => {
-    if (view.kind === 'edit' && !editing) setView({ kind: 'list' })
-  }, [view, editing])
+  // If the edited property has been deleted, fall back to the list. Adjusting
+  // during render rather than in an effect means React re-renders immediately
+  // with the corrected view instead of committing a frame that points at a
+  // property which no longer exists. The condition is false after the update,
+  // so this converges in one pass.
+  if (view.kind === 'edit' && !editing) {
+    setView({ kind: 'list' })
+  }
 
   const handleAdd = (p: Property) => {
     track('property_added')

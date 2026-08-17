@@ -993,7 +993,7 @@ export async function buildComparisonWorkbook(properties: Property[]): Promise<E
 
   // One detail tab per property — Inputs-only sheet with auto-calculated key metrics
   for (const p of properties) {
-    const sheetName = p.nickname.substring(0, 28).replace(/[\\\/\?\*\[\]:]/g, '') || 'Property'
+    const sheetName = p.nickname.substring(0, 28).replace(/[\\/?*[\]:]/g, '') || 'Property'
     const inputsSheet = wb.addWorksheet(sheetName)
     buildPropertyInputsOnly(inputsSheet, p.inputs, p.nickname)
   }

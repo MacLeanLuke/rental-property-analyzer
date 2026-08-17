@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -38,13 +38,18 @@ export function NumberField({
     return v.toString()
   }
 
-  const [text, setText] = useState(toDisplay(value))
+  const [text, setText] = useState(() => toDisplay(value))
+  const [lastValue, setLastValue] = useState(value)
 
-  // Keep text in sync if value changes externally (e.g. reset).
-  useEffect(() => {
+  // Keep the text in sync when `value` changes from outside (a reset, or a
+  // preset being applied). Adjusting during render rather than in an effect is
+  // React's documented pattern for this: the component re-renders immediately
+  // with the corrected text instead of painting the stale value first and
+  // fixing it after commit.
+  if (value !== lastValue) {
+    setLastValue(value)
     setText(toDisplay(value))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }
 
   const commit = (raw: string) => {
     const trimmed = raw.trim().replace(/[$,%]/g, '')
