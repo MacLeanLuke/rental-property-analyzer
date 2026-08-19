@@ -1,4 +1,4 @@
-(function(){"use strict";function p(e,t,o,n,r){return!(o>0)||!(n>0)||n<=o?null:{resource:e,phase:t,startMs:o,endMs:n,note:r}}function g(e){try{const t=new URL(e,"https://example.invalid");return t.pathname.split("/").filter(Boolean).pop()||t.hostname}catch{return e}}function x(e){const t=g(e.name),o=e.requestStart>0,n=e.transferSize??0,r=e.decodedBodySize??0,i=n===0&&r>0,d=[p(t,"queued",e.startTime,e.domainLookupStart||e.fetchStart,"Queued by the browser before the request was dispatched."),p(t,"dns",e.domainLookupStart,e.domainLookupEnd,"DNS resolution. Zero when the hostname was already cached."),p(t,"tcp",e.connectStart,e.secureConnectionStart>0?e.secureConnectionStart:e.connectEnd,"TCP handshake. Zero when an existing connection was reused."),p(t,"tls",e.secureConnectionStart,e.connectEnd,"TLS handshake, measured separately from the TCP connect."),p(t,"ttfb-wait",e.requestStart,e.responseStart,"Request sent; waiting for the first byte. Server time plus one round trip."),p(t,"download",e.responseStart,e.responseEnd,"Response body arriving.")].filter(l=>l!==null);return{name:t,url:e.name,initiatorType:e.initiatorType,protocol:e.nextHopProtocol??"",startMs:e.startTime,durationMs:e.duration,transferBytes:n,decodedBytes:r,fromCache:i,timingsVisible:o,spans:d}}function w(e){const t={};let o=0,n=0,r=0,i=null;for(const s of e){s.timingsVisible||(n+=1),s.fromCache&&(r+=1),o+=s.transferBytes;const d=s.protocol||"unknown";t[d]=(t[d]??0)+1,(!i||s.durationMs>i.durationMs)&&(i=s)}return{requests:e.length,opaque:n,cached:r,totalTransferBytes:o,protocols:t,slowest:i}}function v(e,t={}){const{ignore:o,includeExisting:n=!0}=t;if(typeof PerformanceObserver>"u")return{stop:()=>{}};const r=s=>{o?.(s.name)||e(x(s))},i=new PerformanceObserver(s=>{for(const d of s.getEntries())r(d)});return i.observe({type:"resource",buffered:n}),{stop:()=>i.disconnect()}}const h={queued:"#8b8f98",dns:"#c084fc",tcp:"#60a5fa",tls:"#34d399",request:"#fbbf24","ttfb-wait":"#fbbf24",download:"#f472b6",parse:"#a3a3a3",render:"#f87171"},f={queued:"Queued",dns:"DNS",tcp:"TCP",tls:"TLS",request:"Request","ttfb-wait":"Waiting (TTFB)",download:"Download",parse:"Parse",render:"Render"},S=`
+(function(){"use strict";function c(t,e,i,n,o){return!(i>0)||!(n>0)||n<=i?null:{resource:t,phase:e,startMs:i,endMs:n,note:o}}function w(t){try{const e=new URL(t,"https://example.invalid");return e.pathname.split("/").filter(Boolean).pop()||e.hostname}catch{return t}}function k(t){const e=w(t.name),i=t.requestStart>0,n=t.transferSize??0,o=t.decodedBodySize??0,r=n===0&&o>0,d=[c(e,"queued",t.startTime,t.domainLookupStart||t.fetchStart,"Queued by the browser before the request was dispatched."),c(e,"dns",t.domainLookupStart,t.domainLookupEnd,"DNS resolution. Zero when the hostname was already cached."),c(e,"tcp",t.connectStart,t.secureConnectionStart>0?t.secureConnectionStart:t.connectEnd,"TCP handshake. Zero when an existing connection was reused."),c(e,"tls",t.secureConnectionStart,t.connectEnd,"TLS handshake, measured separately from the TCP connect."),c(e,"ttfb-wait",t.requestStart,t.responseStart,"Request sent; waiting for the first byte. Server time plus one round trip."),c(e,"download",t.responseStart,t.responseEnd,"Response body arriving.")].filter(h=>h!==null);return{name:e,url:t.name,initiatorType:t.initiatorType,protocol:t.nextHopProtocol??"",startMs:t.startTime,durationMs:t.duration,transferBytes:n,decodedBytes:o,fromCache:r,timingsVisible:i,spans:d}}function S(t){const e={};let i=0,n=0,o=0,r=null;for(const s of t){s.timingsVisible||(n+=1),s.fromCache&&(o+=1),i+=s.transferBytes;const d=s.protocol||"unknown";e[d]=(e[d]??0)+1,(!r||s.durationMs>r.durationMs)&&(r=s)}return{requests:t.length,opaque:n,cached:o,totalTransferBytes:i,protocols:e,slowest:r}}function z(t,e={}){const{ignore:i,includeExisting:n=!0}=e;if(typeof PerformanceObserver>"u")return{stop:()=>{}};const o=s=>{i?.(s.name)||t(k(s))},r=new PerformanceObserver(s=>{for(const d of s.getEntries())o(d)});return r.observe({type:"resource",buffered:n}),{stop:()=>r.disconnect()}}const l={minimized:!0,edge:"right",y:.72,open:!1},m="pipe-anatomy:panel:v1";function $(){try{const t=localStorage.getItem(m);if(!t)return{...l};const e=JSON.parse(t);return{minimized:typeof e.minimized=="boolean"?e.minimized:l.minimized,edge:e.edge==="left"||e.edge==="right"?e.edge:l.edge,y:typeof e.y=="number"&&e.y>=0&&e.y<=1?e.y:l.y,open:typeof e.open=="boolean"?e.open:l.open}}catch{return{...l}}}function M(t){try{localStorage.setItem(m,JSON.stringify(t))}catch{}}const f=(t,e,i)=>Math.min(i,Math.max(e,t));function E(t,e,i,n,o){const s=t+i/2<n/2?"left":"right",h=(s==="left"?Math.max(0,-t):Math.max(0,t+i-n))>i*.35;return{edge:s,y:f(e/Math.max(o,1),0,1),minimized:h}}const g={queued:"#8b8f98",dns:"#c084fc",tcp:"#60a5fa",tls:"#34d399",request:"#fbbf24","ttfb-wait":"#fbbf24",download:"#f472b6",parse:"#a3a3a3",render:"#f87171"},b={queued:"Queued",dns:"DNS",tcp:"TCP",tls:"TLS",request:"Request","ttfb-wait":"Waiting (TTFB)",download:"Download",parse:"Parse",render:"Render"},x=`
   :host {
     --bg: #12141a;
     --panel: #1a1d26;
@@ -7,8 +7,6 @@
     --rule: #2a2f3a;
     all: initial;
     position: fixed;
-    right: 16px;
-    bottom: 16px;
     z-index: 2147483000;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px;
@@ -28,9 +26,37 @@
     padding: 8px 10px;
     background: var(--panel);
     border-bottom: 1px solid var(--rule);
-    cursor: pointer;
+    cursor: grab;
     user-select: none;
+    touch-action: none;
   }
+  header:active { cursor: grabbing; }
+  .grip { color: var(--muted); letter-spacing: -2px; font-size: 14px; }
+  .icon-btn {
+    display: grid; place-items: center;
+    width: 22px; height: 22px; padding: 0;
+    border: 0; border-radius: 4px;
+    background: transparent; color: var(--muted);
+    font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .icon-btn:hover { background: rgba(127,127,127,.18); color: var(--ink); }
+
+  /* Docked tab — the panel tucked against an edge. */
+  .tab {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 46px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    cursor: grab;
+    touch-action: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  }
+  .tab:hover { color: var(--ink); }
+  .tab:active { cursor: grabbing; }
+  :host([data-edge="right"]) .tab { border-radius: 8px 0 0 8px; border-right: 0; }
+  :host([data-edge="left"]) .tab { border-radius: 0 8px 8px 0; border-left: 0; }
+  .tab svg { display: block; }
   header h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
   .stats { margin-left: auto; color: var(--muted); font-size: 11px; }
   .body { max-height: 320px; overflow-y: auto; }
@@ -48,20 +74,32 @@
   @media (prefers-color-scheme: light) {
     :host { --bg: #ffffff; --panel: #f4f5f8; --ink: #14161c; --muted: #5b6270; --rule: #d9dde5; }
   }
-`;class y extends HTMLElement{static observedAttributes=["open","limit"];#t=[];#s=null;#e=0;#o;constructor(){super(),this.#o=this.attachShadow({mode:"open"})}get limit(){return Number(this.getAttribute("limit")??"30")}get open(){return this.hasAttribute("open")}connectedCallback(){this.#n(),this.#s=v(t=>{this.#t.push(t),!this.#e&&(this.#e=requestAnimationFrame(()=>{this.#e=0,this.#n()}))})}disconnectedCallback(){this.#s?.stop(),this.#e&&cancelAnimationFrame(this.#e)}attributeChangedCallback(){this.#n()}#n(){const t=this.#t.slice(-this.limit),o=w(this.#t),n=t.length?Math.min(...t.map(a=>a.startMs)):0,r=t.length?Math.max(...t.map(a=>a.startMs+a.durationMs)):1,i=Math.max(r-n,1),s=o.totalTransferBytes>1024*1024?`${(o.totalTransferBytes/1024/1024).toFixed(1)}MB`:`${Math.round(o.totalTransferBytes/1024)}KB`,d=Object.entries(o.protocols).map(([a,u])=>`${a}×${u}`).join(" "),l=t.map(a=>{const u=a.spans.map(c=>{const T=(c.startMs-n)/i*100,M=(c.endMs-c.startMs)/i*100,E=`${f[c.phase]} — ${(c.endMs-c.startMs).toFixed(1)}ms
-${c.note}`;return`<div class="bar" style="left:${T}%;width:${M}%;background:${h[c.phase]}" title="${b(E)}"></div>`}).join(""),q=a.timingsVisible?"":'<div class="opaque">no Timing-Allow-Origin — phases withheld by the browser</div>';return`
-          <div class="row" title="${b(a.url)}">
-            <span class="name">${m(a.name)}</span>
+`;class q extends HTMLElement{static observedAttributes=["open","limit"];#i=[];#a=null;#t=0;#n;#e;#o=null;constructor(){super(),this.#n=this.attachShadow({mode:"open"}),this.#e=$(),this.hasAttribute("open")&&(this.#e.minimized=!1,this.#e.open=!0)}get limit(){return Number(this.getAttribute("limit")??"30")}get open(){return!this.#e.minimized&&this.#e.open}get minimized(){return this.#e.minimized}connectedCallback(){this.#r(),this.#a=z(e=>{this.#i.push(e),!this.#t&&(this.#t=requestAnimationFrame(()=>{this.#t=0,this.#r()}))})}disconnectedCallback(){this.#a?.stop(),this.#t&&cancelAnimationFrame(this.#t)}attributeChangedCallback(e){e==="open"&&this.hasAttribute("open")&&(this.#e.minimized=!1,this.#e.open=!0),this.#r()}minimize(){this.#s({minimized:!0})}restore(){this.#s({minimized:!1,open:!0})}#s(e){this.#e={...this.#e,...e},M(this.#e),this.#r()}#p(){const{edge:e,y:i,minimized:n}=this.#e,o=n?46:260,r=f(i*window.innerHeight,8,Math.max(8,window.innerHeight-o-8));this.setAttribute("data-edge",e),this.style.top=`${r}px`,e==="left"?(this.style.left=n?"0px":"16px",this.style.right="auto"):(this.style.right=n?"0px":"16px",this.style.left="auto")}#c(e,i){const n=this.getBoundingClientRect();this.#o={pointerId:e.pointerId,offsetX:e.clientX-n.left,offsetY:e.clientY-n.top,moved:!1},i.setPointerCapture(e.pointerId),e.preventDefault()}#l=e=>{const i=this.#o;if(!i||e.pointerId!==i.pointerId)return;const n=e.clientX-i.offsetX,o=e.clientY-i.offsetY;Math.abs(e.movementX)+Math.abs(e.movementY)>0&&(i.moved=!0),this.style.left=`${n}px`,this.style.right="auto",this.style.top=`${o}px`};#d=e=>{const i=this.#o;if(!i||e.pointerId!==i.pointerId)return;this.#o=null;const n=this.getBoundingClientRect(),o=E(n.left,n.top,n.width,window.innerWidth,window.innerHeight);if(!i.moved){this.#s(this.#e.minimized?{minimized:!1,open:!0}:{open:!this.#e.open});return}this.#s(o)};#r(){this.#p(),this.#n.innerHTML=this.#e.minimized?this.#h():this.#u(),this.#m()}#h(){const e=this.#i.length;return`
+      <style>${x}</style>
+      <div class="tab" part="tab" role="button" tabindex="0"
+           title="Pipe anatomy — ${e} request${e===1?"":"s"}. Click to open, drag to move.">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <rect x="1" y="3"  width="9"  height="2" rx="1" fill="currentColor" opacity=".55"/>
+          <rect x="4" y="7"  width="10" height="2" rx="1" fill="currentColor"/>
+          <rect x="2" y="11" width="7"  height="2" rx="1" fill="currentColor" opacity=".55"/>
+        </svg>
+        <span class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Open pipe anatomy</span>
+      </div>`}#u(){const e=this.#i.slice(-this.limit),i=S(this.#i),n=e.length?Math.min(...e.map(a=>a.startMs)):0,o=e.length?Math.max(...e.map(a=>a.startMs+a.durationMs)):1,r=Math.max(o-n,1),s=i.totalTransferBytes>1024*1024?`${(i.totalTransferBytes/1024/1024).toFixed(1)}MB`:`${Math.round(i.totalTransferBytes/1024)}KB`,d=Object.entries(i.protocols).map(([a,u])=>`${a}×${u}`).join(" "),h=e.map(a=>{const u=a.spans.map(p=>{const A=(p.startMs-n)/r*100,B=(p.endMs-p.startMs)/r*100,P=`${b[p.phase]} — ${(p.endMs-p.startMs).toFixed(1)}ms
+${p.note}`;return`<div class="bar" style="left:${A}%;width:${B}%;background:${g[p.phase]}" title="${y(P)}"></div>`}).join(""),L=a.timingsVisible?"":'<div class="opaque">no Timing-Allow-Origin — phases withheld by the browser</div>';return`
+          <div class="row" title="${y(a.url)}">
+            <span class="name">${v(a.name)}</span>
             <div class="track">${u}</div>
-          </div>${q}`}).join(""),k=["dns","tcp","tls","ttfb-wait","download","queued"].map(a=>`<span><i class="swatch" style="background:${h[a]}"></i>${f[a]}</span>`).join("");this.#o.innerHTML=`
-      <style>${S}</style>
+          </div>${L}`}).join(""),C=["dns","tcp","tls","ttfb-wait","download","queued"].map(a=>`<span><i class="swatch" style="background:${g[a]}"></i>${b[a]}</span>`).join("");return`
+      <style>${x}</style>
       <div class="panel">
         <header part="header">
+          <span class="grip" aria-hidden="true">⋮⋮</span>
           <h2>Pipe anatomy</h2>
-          <span class="stats">${o.requests} req · ${s}${d?` · ${d}`:""}</span>
+          <span class="stats">${i.requests} req · ${s}${d?` · ${d}`:""}</span>
+          <button class="icon-btn" data-minimize type="button" title="Tuck away" aria-label="Minimise panel">–</button>
         </header>
-        <div class="body" ${this.open?"":"hidden"}>
-          ${t.length?l:'<div class="empty">Waiting for requests…</div>'}
-          <div class="legend">${k}</div>
+        <div class="body" ${this.#e.open?"":"hidden"}>
+          ${e.length?h:'<div class="empty">Waiting for requests…</div>'}
+          <div class="legend">${C}</div>
         </div>
-      </div>`,this.#o.querySelector("header")?.addEventListener("click",()=>{this.toggleAttribute("open")})}}function m(e){return e.replace(/[&<>]/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[t])}function b(e){return m(e).replace(/"/g,"&quot;")}function $(e="pipe-anatomy"){typeof customElements<"u"&&!customElements.get(e)&&customElements.define(e,y)}if($(),typeof document<"u"&&!document.querySelector("pipe-anatomy")){const e=document.createElement("pipe-anatomy");e.setAttribute("open",""),document.body.appendChild(e)}})();
+      </div>`}#m(){const e=this.#n.querySelector("header, .tab");e&&(e.addEventListener("pointerdown",i=>this.#c(i,e)),e.addEventListener("pointermove",this.#l),e.addEventListener("pointerup",this.#d),e.addEventListener("pointercancel",this.#d),e.addEventListener("keydown",i=>{const n=i.key;(n==="Enter"||n===" ")&&(i.preventDefault(),this.#e.minimized?this.restore():this.minimize())}),this.#n.querySelector("[data-minimize]")?.addEventListener("click",i=>{i.stopPropagation(),this.minimize()}))}}function v(t){return t.replace(/[&<>]/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[e])}function y(t){return v(t).replace(/"/g,"&quot;")}function T(t="pipe-anatomy"){typeof customElements<"u"&&!customElements.get(t)&&customElements.define(t,q)}T(),typeof document<"u"&&!document.querySelector("pipe-anatomy")&&document.body.appendChild(document.createElement("pipe-anatomy"))})();
