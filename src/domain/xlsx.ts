@@ -295,7 +295,12 @@ function buildHoldScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
 
     // CASH FLOW
     ws.getCell(r, 10).value = { formula: `C${r}-I${r}` }
-    ws.getCell(r, 11).value = { formula: `IF(T${r}>0,${INP}$B$12*12,0)` }
+    // Payments are owed whenever the year starts with a balance. In the payoff
+    // year, charge only the payments actually left (NPER counts them).
+    const startBal = i === 0 ? `${INP}B10` : `T${r - 1}`
+    ws.getCell(r, 11).value = {
+      formula: `IF(${startBal}>0,${INP}$B$12*MIN(12,NPER(${INP}$B$11/12,-${INP}$B$12,${startBal})),0)`,
+    }
     ws.getCell(r, 12).value =
       i === 0
         ? { formula: `${INP}B10-T${r}` }
@@ -527,7 +532,7 @@ function buildDecisionSheet(wb: ExcelJS.Workbook): Worksheet {
     'How much rental beats the bar ON AVERAGE. Also = how much hurdle could rise before verdict flips (breakeven)',
     'What your equity earned THIS YEAR alone (not an average)',
     'Is your equity still beating stocks RIGHT NOW? Positive = yes',
-    'Would you be richer keeping or selling? Positive = keep wins',
+    'Would you be richer keeping or selling? Cash in hand after selling costs and taxes on both sides. Positive = keep wins',
     "Today's dollar value of keeping vs selling. Positive = rental worth more",
     'NPV if things go better than expected (hurdle 1% lower)',
     'NPV if things go worse than expected (hurdle 1% higher)',
@@ -550,7 +555,7 @@ function buildDecisionSheet(wb: ExcelJS.Workbook): Worksheet {
     'IRR − Hurdle\n(avg / breakeven)',
     'ROE This Year',
     'ROE − Hurdle\n(this year)',
-    'Wealth Advantage ($)\nKeep − Sell',
+    'Wealth Advantage ($)\nKeep − Sell, after tax',
     'NPV at Exit',
     'NPV Optimistic\n(hurdle − 1%)',
     'NPV Pessimistic\n(hurdle + 1%)',
@@ -591,7 +596,9 @@ function buildDecisionSheet(wb: ExcelJS.Workbook): Worksheet {
     eCell.numFmt = PCT_FMT
 
     const fCell = ws.getCell(r, 6)
-    fCell.value = { formula: `${YBY}U${ybyR}-${SELL}C${sellR}` }
+    // Both sides as cash in hand: rental sold (after selling costs, payoff,
+    // recapture, cap gains) vs stocks cashed out (after cap gains).
+    fCell.value = { formula: `${YBY}AB${ybyR}-${SELL}H${sellR}` }
     fCell.numFmt = MONEY_FMT
 
     const jCell = ws.getCell(r, 10)
@@ -664,7 +671,7 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
   const INP = 'Inputs!'
   const YBY = "'Hold Scenario'!"
 
-  ws.mergeCells('A1:F1')
+  ws.mergeCells('A1:H1')
   const t = ws.getCell('A1')
   t.value = 'SELL SCENARIO — IF YOU SOLD TODAY & INVESTED IN STOCKS'
   t.font = WHITE_BOLD
@@ -678,6 +685,8 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
     'Annual Stock Growth ($)',
     'Stock ROE',
     'Cumulative Gain ($)',
+    'Cost Basis ($)',
+    'After-Tax Value ($)',
   ]
   headers.forEach((h, i) => {
     const c = ws.getCell(2, i + 1)
@@ -717,16 +726,26 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
     const f = ws.getCell(r, 6)
     f.value = { formula: `C${r}-${INP}B50` }
     f.numFmt = MONEY_FMT
+
+    // Basis = money put in: the sale proceeds plus every redirected dollar.
+    const g = ws.getCell(r, 7)
+    g.value = { formula: `MAX(0,${INP}B50+SUM(B$${DATA_START}:B${r}))` }
+    g.numFmt = MONEY_FMT
+
+    // What you'd keep if you cashed the portfolio out this year.
+    const h = ws.getCell(r, 8)
+    h.value = { formula: `C${r}-MAX(0,C${r}-G${r})*${INP}$B$31` }
+    h.numFmt = MONEY_FMT
   }
 
-  for (let col = 1; col <= 6; col++) ws.getColumn(col).width = 20
+  for (let col = 1; col <= 8; col++) ws.getColumn(col).width = 20
   ws.getColumn(1).width = 8
 
   const noteRow = DATA_START + N + 2
-  ws.mergeCells(`A${noteRow}:F${noteRow}`)
+  ws.mergeCells(`A${noteRow}:H${noteRow}`)
   const note = ws.getCell(noteRow, 1)
   note.value =
-    'Starting value = net proceeds after selling costs, mortgage payoff, depreciation recapture, and capital gains tax (Inputs B50). Cash Redirected = money you would save each year by not owning the rental.'
+    'Starting value = net proceeds after selling costs, mortgage payoff, depreciation recapture, and capital gains tax (Inputs B50). Cash Redirected = money you would save each year by not owning the rental. After-Tax Value = portfolio minus capital gains tax on growth above cost basis.'
   note.font = NOTE_FONT
   note.alignment = { wrapText: true }
   ws.getRow(noteRow).height = 30

@@ -33,6 +33,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "fast-formula-parser": "^1.0.19",
     "globals": "^17.4.0",
     "tailwindcss": "^4.2.2",
     "tw-animate-css": "^1.4.0",
