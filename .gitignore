@@ -29,3 +29,4 @@ smoke-*.xlsx
 
 # Local planning docs — kept out of the public repo
 docs/superpowers/
+.vercel
