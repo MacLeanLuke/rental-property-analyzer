@@ -41,7 +41,7 @@ async function main() {
   const inputs = reopened.getWorksheet('Inputs')!
   console.log('B4 (purchase price):', inputs.getCell('B4').value)
   console.log('B12 (P&I, expected formula):', inputs.getCell('B12').value)
-  console.log('A13 / B13 (loan term):', inputs.getCell('A13').value, '/', inputs.getCell('B13').value)
+  console.log('A13 / B13 (years remaining):', inputs.getCell('A13').value, '/', inputs.getCell('B13').value)
   console.log('B50 (net proceeds formula):', inputs.getCell('B50').value)
 
   const hs = reopened.getWorksheet('Hold Scenario')!

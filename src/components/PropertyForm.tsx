@@ -79,9 +79,9 @@ export function PropertyForm({ property, onChange, onBack }: PropertyFormProps) 
           </Section>
 
           <Section title="Mortgage">
-            <NumberField label="Current mortgage balance" value={i.mortgageBalance} onChange={(v) => updateInput('mortgageBalance', v)} format="money" />
+            <NumberField label="Current mortgage balance" value={i.mortgageBalance} onChange={(v) => updateInput('mortgageBalance', v)} format="money" hint="Today's principal balance from your latest statement, not the original loan amount" />
             <NumberField label="Annual interest rate" value={i.mortgageRate} onChange={(v) => updateInput('mortgageRate', v)} format="percent" />
-            <NumberField label="Loan term (years)" value={i.loanTermYears} onChange={(v) => updateInput('loanTermYears', v)} format="number" hint="Typically 30 for residential, 15 or 20 for shorter loans" />
+            <NumberField label="Years remaining on loan" value={i.loanTermYears} onChange={(v) => updateInput('loanTermYears', v)} format="number" hint="Years until payoff, not the original term. E.g. a 30-year loan taken out 5 years ago has 25 left" />
             <ComputedPi inputs={i} />
           </Section>
 

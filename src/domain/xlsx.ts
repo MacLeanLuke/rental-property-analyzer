@@ -100,7 +100,7 @@ function buildInputsSheet(wb: ExcelJS.Workbook, inputs: PropertyInputs): Workshe
   setInput(ws, 10, 1, 'Current mortgage balance', d.mortgageBalance, MONEY_FMT)
   setInput(ws, 11, 1, 'Annual interest rate', d.mortgageRate, '0.000%')
   setCalc(ws, 12, 1, 'Monthly P&I payment (auto)', 'IFERROR(-PMT(B11/12,B13*12,B10),0)', MONEY2_FMT)
-  setInput(ws, 13, 1, 'Loan term (years)', d.loanTermYears, '0')
+  setInput(ws, 13, 1, 'Years remaining on loan', d.loanTermYears, '0')
 
   setSection(ws, 14, 1, '── RENTAL INCOME ──')
   setInput(ws, 15, 1, 'Monthly gross rent', d.monthlyRent, MONEY2_FMT)
@@ -1022,7 +1022,7 @@ function buildPropertyInputsOnly(ws: Worksheet, inputs: PropertyInputs, nickname
   setInput(ws, 10, 1, 'Current mortgage balance', d.mortgageBalance, MONEY_FMT)
   setInput(ws, 11, 1, 'Annual interest rate', d.mortgageRate, '0.000%')
   setCalc(ws, 12, 1, 'Monthly P&I payment (auto)', 'IFERROR(-PMT(B11/12,B13*12,B10),0)', MONEY2_FMT)
-  setInput(ws, 13, 1, 'Loan term (years)', d.loanTermYears, '0')
+  setInput(ws, 13, 1, 'Years remaining on loan', d.loanTermYears, '0')
 
   setSection(ws, 14, 1, '── RENTAL INCOME ──')
   setInput(ws, 15, 1, 'Monthly gross rent', d.monthlyRent, MONEY2_FMT)
