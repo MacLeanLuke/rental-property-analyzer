@@ -705,11 +705,16 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
     b.value = { formula: `-(${YBY}N${ybyR}+${YBY}R${ybyR})` }
     b.numFmt = MONEY_FMT
 
+    // Value and basis at the start of the year, after a year of growth.
+    const grown = i === 0 ? `${INP}B50*(1+${INP}$B$35)` : `C${r - 1}*(1+${INP}$B$35)`
+    const prevBasis = i === 0 ? `${INP}B50` : `G${r - 1}`
+    // A withdrawal (negative B) sells shares pro rata, so part of each sale is
+    // gain taxed now. Sell enough extra to cover that tax.
+    const gainShare = `MAX(0,1-${prevBasis}/(${grown}))`
+    const grossSale = `(-B${r}/(1-${gainShare}*${INP}$B$31))`
+
     const c = ws.getCell(r, 3)
-    c.value =
-      i === 0
-        ? { formula: `${INP}B50*(1+${INP}$B$35)+B${r}` }
-        : { formula: `C${r - 1}*(1+${INP}$B$35)+B${r}` }
+    c.value = { formula: `IF(OR(B${r}>=0,${grown}<=0),${grown}+B${r},${grown}-${grossSale})` }
     c.numFmt = MONEY_FMT
 
     const d = ws.getCell(r, 4)
@@ -727,9 +732,11 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
     f.value = { formula: `C${r}-${INP}B50` }
     f.numFmt = MONEY_FMT
 
-    // Basis = money put in: the sale proceeds plus every redirected dollar.
+    // Basis grows with money put in and shrinks in proportion to shares sold.
     const g = ws.getCell(r, 7)
-    g.value = { formula: `MAX(0,${INP}B50+SUM(B$${DATA_START}:B${r}))` }
+    g.value = {
+      formula: `IF(B${r}>=0,${prevBasis}+B${r},IF(${grown}<=0,0,MAX(0,${prevBasis}*(1-${grossSale}/(${grown})))))`,
+    }
     g.numFmt = MONEY_FMT
 
     // What you'd keep if you cashed the portfolio out this year.
@@ -745,7 +752,7 @@ function buildSellScenarioSheet(wb: ExcelJS.Workbook): Worksheet {
   ws.mergeCells(`A${noteRow}:H${noteRow}`)
   const note = ws.getCell(noteRow, 1)
   note.value =
-    'Starting value = net proceeds after selling costs, mortgage payoff, depreciation recapture, and capital gains tax (Inputs B50). Cash Redirected = money you would save each year by not owning the rental. After-Tax Value = portfolio minus capital gains tax on growth above cost basis.'
+    'Starting value = net proceeds after selling costs, mortgage payoff, depreciation recapture, and capital gains tax (Inputs B50). Cash Redirected = money you would save each year by not owning the rental. When the rental would pay you, the same cash is withdrawn here, selling shares pro rata and paying capital gains tax on the gain part as you go. After-Tax Value = portfolio minus capital gains tax on growth above cost basis.'
   note.font = NOTE_FONT
   note.alignment = { wrapText: true }
   ws.getRow(noteRow).height = 30

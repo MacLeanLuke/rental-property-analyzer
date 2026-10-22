@@ -163,4 +163,29 @@ describe('Hold vs Sell — wealth advantage compares cash in hand on both sides'
     expect(v('Sell Scenario', 'H3')).toBeCloseTo(101_990, 2)
     expect(v(DECISION, `F${decisionRow(1)}`)).toBeCloseTo(-7_990, 2)
   })
+
+  it('taxes the gain part of each withdrawal when the rental pays you', async () => {
+    // The rental pays 9,600 a year, so the sell side withdraws 9,600 a year from
+    // a 94,000 account growing 10%, selling shares pro rata (15% tax on gains).
+    // Year 1: grows to 103,400; 1/11 of it is gain. To net 9,600, sell
+    //   9,600 / (1 − 0.15/11) = 9,732.72 → 93,667.28 left, basis 85,152.07.
+    // Year 2: grows to 103,034.01; gain share = 1 − 85,152.07/103,034.01 = 2.1/12.1.
+    //   Sell 9,600 / (1 − 0.15 × 2.1/12.1) = 9,856.60 → 93,177.41 left,
+    //   basis 77,006.13. After tax: 93,177.41 − 15% × 16,171.29 = 90,751.72.
+    // Keep − Sell = 94,000 − 90,751.72 = 3,248.28.
+    // (Deferring all the tax to the end instead would give 90,763.00.)
+    const v = await workbookFor({
+      ...simple,
+      monthlyRent: 1000,
+      maintenanceMo: 200,
+      rentGrowth: 0,
+      inflation: 0,
+      stockReturn: 0.1,
+      capGainsRate: 0.15,
+    })
+    expect(v('Sell Scenario', 'C4')).toBeCloseTo(93_177.41, 1)
+    expect(v('Sell Scenario', 'G4')).toBeCloseTo(77_006.13, 1)
+    expect(v('Sell Scenario', 'H4')).toBeCloseTo(90_751.72, 1)
+    expect(v(DECISION, `F${decisionRow(2)}`)).toBeCloseTo(3_248.28, 1)
+  })
 })
